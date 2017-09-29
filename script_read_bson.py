@@ -5,8 +5,6 @@ from scipy.ndimage import imread   # or, whatever image library you prefer
 import multiprocessing as mp      # will come in handy due to the size of the data
 import pandas as pd
 
-# Simple data processing
-
 data = bson.decode_file_iter(open('../train_example.bson', 'rb'))
 
 for c, d in enumerate(data):
