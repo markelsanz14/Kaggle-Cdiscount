@@ -14,6 +14,6 @@ for c, d in enumerate(data):
     for e, pic in enumerate(d['imgs']):
         picture = imread(io.BytesIO(pic['picture']))
         # do something with the picture, etc
-        plt.imsave('../train/'+str(product_id)+'-'+str(picture_id)+'-'+str(category_id)+'.png', picture)
+        plt.imsave('../train_example/'+str(product_id)+'-'+str(picture_id)+'-'+str(category_id)+'.png', picture)
         picture_id += 1
 

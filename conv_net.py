@@ -23,9 +23,10 @@ def bias_variable(shape):
     return tf.Variable(initial)
 
 
-def conv_net(category_dict):
+def conv_net(category_to_int, int_to_category):
     num_iterations = 20000
-    batch_size = 8
+    tr_batch_size = 32
+    val_batch_size = 1024
 
     x = tf.placeholder(tf.float32, [None, 180*180*3])
     x_image = tf.reshape(x, [-1, 180, 180, 3])
@@ -86,18 +87,24 @@ def conv_net(category_dict):
 
     for step in range(1, num_iterations):
         # Get new batch
-        batch_x, batch_y = get_next_batch(batch_size, category_dict)
+        tr_batch_x, tr_batch_y = get_next_training_batch(tr_batch_size, category_to_int)
 
         if step % 100 == 0:
-            train_d = {x: batch_x, y_: batch_y, keep_prob: 1.0}
+            train_d = {x: tr_batch_x, y_: tr_batch_y, keep_prob: 1.0}
             train_acc = accuracy.eval(feed_dict=train_d)
-            print('step %d, training accuracy %g' % (step, train_acc))
-        
-        train_d = {x: batch_x, y_: batch_y, keep_prob: 0.5}
+            print('step {}, training accuracy {}'.format(step, train_acc))
+
+            # Get validation batch and print accuracy
+            val_batch_x, val_batch_y = get_next_validation_batch(val_batch_size, category_to_int)
+            val_d = {x: val_batch_x, y_: val_batch_y, keep_prob: 1.0}
+            val_acc = accuracy.eval(feed_dict=val_d)
+            print('step {}, validation accuracy {} \n'.format(step, val_acc))
+
+        train_d = {x: tr_batch_x, y_: tr_batch_y, keep_prob: 0.5}
         train_step.run(feed_dict=train_d)
 
-    batch_x, batch_y = get_next_batch(110, category_dict)
-    train_d = {x: batch_x, y_: batch_y, keep_prob: 1.0}
+    val_batch_x, val_batch_y = get_next_batch(4*val_batch_size, category_to_int)
+    train_d = {x: val_batch_x, y_: val_batch_y, keep_prob: 1.0}
     final_accuracy = accuracy.eval(feed_dict=train_d)
-    print('FINAL training accuracy %g' % final_accuracy)
+    print('FINAL training accuracy {}'.format(final_accuracy))
 
