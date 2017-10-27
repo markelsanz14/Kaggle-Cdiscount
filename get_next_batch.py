@@ -12,7 +12,6 @@ def create_connection():
  
     return None
 
-
 def get_next_training_batch(batch_size, category_to_int):
     conn = create_connection()
     with conn:
