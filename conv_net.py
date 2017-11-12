@@ -25,7 +25,7 @@ def bias_variable(shape):
 
 def conv_net(category_to_int, int_to_category):
     num_iterations = 20000
-    tr_batch_size = 1
+    tr_batch_size = 32
     val_batch_size = 256
 
     x = tf.placeholder(tf.float32, [None, 180*180*3])
@@ -77,8 +77,8 @@ def conv_net(category_to_int, int_to_category):
     train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
     correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
-    correct_prediction = tf.cast(correct_prediction, tf.float32)
-    accuracy = tf.reduce_mean(correct_prediction)
+    prediction = tf.cast(correct_prediction, tf.float32)
+    accuracy = tf.reduce_mean(prediction)
 
     print('Starting training...')
     sess = tf.Session()
@@ -86,28 +86,25 @@ def conv_net(category_to_int, int_to_category):
     sess.run(tf.global_variables_initializer())
     print('variables initialized')
 
-    for step in range(1, num_iterations):
-        # Get new batch
-        print('Step {}'.format(step))
-        tr_batch_x, tr_batch_y = get_next_training_batch(tr_batch_size, category_to_int)
-        print(tr_batch_x)
-        print('Training batch collected for step {}'.format(step))
-        if step % 5 == 0:
-            train_d = {x: tr_batch_x, y_: tr_batch_y, keep_prob: 1.0}
-            train_acc = accuracy.eval(feed_dict=train_d)
-            print('step {}, training accuracy {}'.format(step, train_acc))
+    with sess.as_default():
+        for step in range(1, num_iterations):
+            # Get new batch
+            tr_batch_x, tr_batch_y = get_next_training_batch(tr_batch_size, category_to_int)
+            if step % 50 == 0:
+                train_d = {x: tr_batch_x, y_: tr_batch_y, keep_prob: 1.0}
+                train_acc = accuracy.eval(feed_dict=train_d)
 
-            # Get validation batch and print accuracy
-            val_batch_x, val_batch_y = get_next_validation_batch(val_batch_size, category_to_int)
-            val_d = {x: val_batch_x, y_: val_batch_y, keep_prob: 1.0}
-            val_acc = accuracy.eval(feed_dict=val_d)
-            print('step {}, validation accuracy {} \n'.format(step, val_acc))
+                # Get validation batch and print accuracy
+                val_batch_x, val_batch_y = get_next_validation_batch(val_batch_size, category_to_int)
+                val_d = {x: val_batch_x, y_: val_batch_y, keep_prob: 1.0}
+                val_acc = accuracy.eval(feed_dict=val_d)
+                print('step {}, training accuracy {}, validation accuracy {}'.format(step, train_acc, val_acc))
 
-        train_d = {x: tr_batch_x, y_: tr_batch_y, keep_prob: 0.5}
-        sess.run(train_step, feed_dict=train_d)
+            train_d = {x: tr_batch_x, y_: tr_batch_y, keep_prob: 0.5}
+            sess.run(train_step, feed_dict=train_d)
 
-    val_batch_x, val_batch_y = get_next_batch(4*val_batch_size, category_to_int)
-    train_d = {x: val_batch_x, y_: val_batch_y, keep_prob: 1.0}
-    final_accuracy = accuracy.eval(feed_dict=train_d)
-    print('FINAL training accuracy {}'.format(final_accuracy))
+        val_batch_x, val_batch_y = get_next_batch(4*val_batch_size, category_to_int)
+        train_d = {x: val_batch_x, y_: val_batch_y, keep_prob: 1.0}
+        final_accuracy = accuracy.eval(feed_dict=train_d)
+        print('FINAL training accuracy {}'.format(final_accuracy))
 

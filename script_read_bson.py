@@ -6,7 +6,8 @@ import pandas as pd
 import glob
 import os
 import sqlite3
-
+import numpy as np
+import json
 
 def genimages():
     data = bson.decode_file_iter(open('../train.bson', 'rb'))
@@ -20,8 +21,7 @@ def genimages():
         picture_id = 0
         for e, pic in enumerate(d['imgs']):
             if i > -1:
-                picture = imread(io.BytesIO(pic['picture']))
-                print(picture)
+                picture = json.dumps(imread(io.BytesIO(pic['picture'])).tolist())
                 name = str(product_id)+'-'+str(picture_id)+'-'+str(category_id)
                 picture_id += 1
                 i += 1
