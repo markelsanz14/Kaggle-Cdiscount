@@ -1,5 +1,6 @@
 from PIL import Image
 import os
+import base64, io
 import numpy as np
 import pandas as pd
 import sqlite3
@@ -17,9 +18,10 @@ def get_next_training_batch(batch_size, category_to_int):
     batch_y = []
 
     for im in images:
-        image = im[2]
+        image = Image.open(io.BytesIO(base64.b64decode(im[2])))
+        #image = im[2]
         print(image)
-        image = image.decode('base64')
+        #image = image.decode('base64')
         print(image)
         elems = im[1].split('-')
 
