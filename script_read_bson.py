@@ -21,7 +21,10 @@ def genimages():
         picture_id = 0
         for e, pic in enumerate(d['imgs']):
             if i > -1:
-                picture = json.dumps(imread(io.BytesIO(pic['picture'])).tolist())
+                picture = imread(io.BytesIO(pic['picture']))
+                print(picture.shape)
+                picture = picture.tostring()
+                print(len(picture))
                 name = str(product_id)+'-'+str(picture_id)+'-'+str(category_id)
                 picture_id += 1
                 i += 1
@@ -34,7 +37,7 @@ def genimages():
                     print(i)
 
 try:
-    pathW = '/media/markelsanz14/7EA64A44A649FD61/Users/marke/Desktop/myImages.db'
+    pathW = 'D:/CDiscount/myImages.db'
     pathM = '/media/markelsanz14/Markel/myImages.db'
     connection = sqlite3.connect(pathW)
     cursor = connection.cursor()

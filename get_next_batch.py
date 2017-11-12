@@ -5,9 +5,10 @@ import numpy as np
 import pandas as pd
 import sqlite3
 import json
+import matplotlib.pyplot as plt
 
 def get_next_training_batch(batch_size, category_to_int):
-    pathW = '/media/markelsanz14/7EA64A44A649FD61/Users/marke/Desktop/myImages.db'
+    pathW = 'D:/CDiscount/myImages.db'
     pathD = '/media/markelsanz14/Markel/myImages.db'
     conn = sqlite3.connect(pathW)
     cur = conn.cursor()
@@ -18,7 +19,13 @@ def get_next_training_batch(batch_size, category_to_int):
     batch_y = []
 
     for im in images:
-        image = np.asarray(json.loads(str(im[2])))
+        image = np.fromstring(im[2], dtype="uint8")
+        real_image = np.resize(image, (180,180,3))
+        #print(real_image.shape)
+        #img = Image.fromarray(real_image, 'RGB')
+        #img.show()
+
+
         elems = im[1].split('-')
 
         # Add label
@@ -29,7 +36,7 @@ def get_next_training_batch(batch_size, category_to_int):
         batch_y.append(label_one_hot)
 
         # Add features flattened
-        image_pixels = np.asarray(image.reshape(image.shape[0]*image.shape[1]*3))
+        image_pixels = np.asarray(image)
         batch_x.append(image_pixels)
 
     return batch_x, batch_y
