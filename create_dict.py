@@ -7,5 +7,6 @@ def create_dict():
     for category, val in csv_file:
         category_to_int[category] = val
         int_to_category[val] = category
+    print('Dictionaries Created')
     return category_to_int, int_to_category
 

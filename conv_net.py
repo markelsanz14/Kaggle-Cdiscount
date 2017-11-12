@@ -1,5 +1,5 @@
 import tensorflow as tf
-from get_next_batch import get_next_batch
+from get_next_batch import get_next_training_batch, get_next_validation_batch
 
 def conv2d(x, W):
     """conv2d returns a 2d convolution layer with full stride."""
@@ -25,8 +25,8 @@ def bias_variable(shape):
 
 def conv_net(category_to_int, int_to_category):
     num_iterations = 20000
-    tr_batch_size = 32
-    val_batch_size = 1024
+    tr_batch_size = 1
+    val_batch_size = 256
 
     x = tf.placeholder(tf.float32, [None, 180*180*3])
     x_image = tf.reshape(x, [-1, 180, 180, 3])
@@ -36,30 +36,30 @@ def conv_net(category_to_int, int_to_category):
     # Build the graph for the deep net
     
     # First convolutional layer
-    W_conv1 = weight_variable([5, 5, 3, 32])
-    b_conv1 = bias_variable([32])
+    W_conv1 = weight_variable([5, 5, 3, 8])
+    b_conv1 = bias_variable([8])
     h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
     h_pool1 = max_pool_2x2(h_conv1)
     # New size of images is 90x90
 
     # Second convolutional layer
-    W_conv2 = weight_variable([5, 5, 32, 64])
-    b_conv2 = bias_variable([64])
+    W_conv2 = weight_variable([5, 5, 8, 16])
+    b_conv2 = bias_variable([16])
     h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
     h_pool2 = max_pool_2x2(h_conv2)
     # New size of images is 45x45
 
     # Third convolutional layer
-    W_conv3 = weight_variable([5, 5, 64, 128])
-    b_conv3 = bias_variable([128])
-    h_conv3 = tf.nn.relu(conv2d(h_pool2, W_conv3) + b_conv3)
-    h_pool3 = max_pool_2x2(h_conv3)
+    #W_conv3 = weight_variable([5, 5, 64, 128])
+    #b_conv3 = bias_variable([128])
+    #h_conv3 = tf.nn.relu(conv2d(h_pool2, W_conv3) + b_conv3)
+    #h_pool3 = max_pool_2x2(h_conv3)
     # New size of images is 23x23
-    h_pool3_flat = tf.reshape(h_pool3, [-1, 23*23*128])
+    h_pool3_flat = tf.reshape(h_pool2, [-1, 45*45*16])
 
     # Fully connected layer 1
-    W_fc1 = weight_variable([23*23*128, 8192])
-    b_fc1 = bias_variable([8192])
+    W_fc1 = weight_variable([45*45*16, 256])
+    b_fc1 = bias_variable([256])
     h_fc1 = tf.nn.relu(tf.matmul(h_pool3_flat, W_fc1) + b_fc1)
 
     # Dropout layer
@@ -67,7 +67,7 @@ def conv_net(category_to_int, int_to_category):
     h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
     # Output layer
-    W_fc2 = weight_variable([8192, 5270])
+    W_fc2 = weight_variable([256, 5270])
     b_fc2 = bias_variable([5270])
     y_conv = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 
@@ -82,14 +82,17 @@ def conv_net(category_to_int, int_to_category):
 
     print('Starting training...')
     sess = tf.Session()
+    print('Session obtained')
     sess.run(tf.global_variables_initializer())
-
+    print('variables initialized')
 
     for step in range(1, num_iterations):
         # Get new batch
+        print('Step {}'.format(step))
         tr_batch_x, tr_batch_y = get_next_training_batch(tr_batch_size, category_to_int)
-
-        if step % 100 == 0:
+        print(tr_batch_x)
+        print('Training batch collected for step {}'.format(step))
+        if step % 5 == 0:
             train_d = {x: tr_batch_x, y_: tr_batch_y, keep_prob: 1.0}
             train_acc = accuracy.eval(feed_dict=train_d)
             print('step {}, training accuracy {}'.format(step, train_acc))
@@ -101,7 +104,7 @@ def conv_net(category_to_int, int_to_category):
             print('step {}, validation accuracy {} \n'.format(step, val_acc))
 
         train_d = {x: tr_batch_x, y_: tr_batch_y, keep_prob: 0.5}
-        train_step.run(feed_dict=train_d)
+        sess.run(train_step, feed_dict=train_d)
 
     val_batch_x, val_batch_y = get_next_batch(4*val_batch_size, category_to_int)
     train_d = {x: val_batch_x, y_: val_batch_y, keep_prob: 1.0}
