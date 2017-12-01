@@ -10,7 +10,7 @@ import tensorflow as tf
 
 from create_dict import create_dict
 
-
+#Wrapper functions used to convert data into tfrecord data
 def _int64_feature(value):
     """Wrapper for inserting int64 features into Example proto."""
     if not isinstance(value, list):
@@ -35,8 +35,10 @@ category_to_int, int_to_category = create_dict()
 print(category_to_int)
 print(category_to_int['1000010653'])
 
-path_record = 'D:/CDiscount/cdiscount_validate.record'
-writer = tf.python_io.TFRecordWriter(path_record)
+train_record = 'D:/CDiscount/cdiscount_train.record'
+validate_record = 'D:/CDiscount/cdiscount_validate.record'
+train_writer = tf.python_io.TFRecordWriter(train_record)
+validate_writer = tf.python_io.TFRecordWriter(validate_record)
 
 data = bson.decode_file_iter(open('../train.bson', 'rb'))
 
@@ -74,7 +76,11 @@ for c, d in enumerate(data):
 
             if i % 200 == 0:
                 print(i)
-            writer.write(example.SerializeToString())
+
+            if i % 10 == 3 or i % 10 == 8:
+                validate_writer.write(example.SerializeToString())
+            else:
+                train_writer.write(example.SerializeToString())
             picture_id += 1
             i += 1
         else:
@@ -82,4 +88,5 @@ for c, d in enumerate(data):
             if i % 1000 == 0:
                 print(i)
 
-writer.close()
+train_writer.close()
+validate_writer.close()
