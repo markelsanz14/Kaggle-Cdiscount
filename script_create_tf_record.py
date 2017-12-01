@@ -35,10 +35,10 @@ category_to_int, int_to_category = create_dict()
 print(category_to_int)
 print(category_to_int['1000010653'])
 
-train_record = 'D:/CDiscount/cdiscount_train.record'
-validate_record = 'D:/CDiscount/cdiscount_validate.record'
+train_record = '/home2/kvtran2/CDiscount/cdiscount_train.tfrecord'
+#validate_record = 'D:/CDiscount/cdiscount_validation.tfrecord'
 train_writer = tf.python_io.TFRecordWriter(train_record)
-validate_writer = tf.python_io.TFRecordWriter(validate_record)
+#validate_writer = tf.python_io.TFRecordWriter(validate_record)
 
 data = bson.decode_file_iter(open('../train.bson', 'rb'))
 
@@ -51,7 +51,7 @@ for c, d in enumerate(data):
     category_id = d['category_id']
     picture_id = 0
     for e, pic in enumerate(d['imgs']):
-        if i > 10000000:
+        if i > -1:
             image_buffer = pic['picture']
             picture = imread(io.BytesIO(pic['picture']))
 
@@ -74,19 +74,16 @@ for c, d in enumerate(data):
                 'image/filename': _bytes_feature(os.path.basename(name).encode('utf8')),
                 'image/encoded': _bytes_feature(image_buffer)}))
 
-            if i % 200 == 0:
+            if i % 10000 == 0:
                 print(i)
 
-            if i % 10 == 3 or i % 10 == 8:
-                validate_writer.write(example.SerializeToString())
-            else:
-                train_writer.write(example.SerializeToString())
+            train_writer.write(example.SerializeToString())
             picture_id += 1
             i += 1
         else:
             i += 1
-            if i % 1000 == 0:
+            if i % 10000 == 0:
                 print(i)
 
 train_writer.close()
-validate_writer.close()
+#validate_writer.close()
