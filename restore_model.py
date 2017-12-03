@@ -2,17 +2,16 @@ import tensorflow as tf
 from get_next_batch import get_next_training_batch, get_next_validation_batch
 
 def restore_model(category_to_int, int_to_category):
-    first_iteration = 200
-    last_iteration = 300
-    tr_batch_size = 8
-    val_batch_size = 32
-    num_prints = 50
-    num_saves = 100
+    num_iterations = 20000
+    tr_batch_size = 64
+    val_batch_size = 64
+    num_prints = 100
+    num_saves = 200
 
     print('Starting training...')
     
     with tf.Session() as sess:
-        saver = tf.train.import_meta_graph('../models/model_final.meta')
+        saver = tf.train.import_meta_graph('../models/model.meta')
         saver.restore(sess, tf.train.latest_checkpoint('../models/'))
         
         graph = tf.get_default_graph()
@@ -22,6 +21,8 @@ def restore_model(category_to_int, int_to_category):
         b_conv1 = graph.get_tensor_by_name('b_conv1:0')
         W_conv2 = graph.get_tensor_by_name('W_conv2:0')
         b_conv2 = graph.get_tensor_by_name('b_conv2:0')
+        W_conv3 = graph.get_tensor_by_name('W_conv3:0')
+        b_conv3 = graph.get_tensor_by_name('b_conv3:0')
         W_fc1 = graph.get_tensor_by_name('W_fc1:0')
         b_fc1 = graph.get_tensor_by_name('b_fc1:0')
         keep_prob = graph.get_tensor_by_name('keep_prob:0')
@@ -38,11 +39,12 @@ def restore_model(category_to_int, int_to_category):
         prediction = tf.cast(correct_prediction, tf.float32)
         accuracy = tf.reduce_mean(prediction)
     
-
+        '''
         tr_batch_x, tr_batch_y = get_next_training_batch(tr_batch_size, category_to_int)
         train_d = {x:tr_batch_x, y_:tr_batch_y, keep_prob:1.0}
         res = loss.eval(feed_dict=train_d)
-        for step in range(first_iteration+1, last_iteration+1):
+        '''
+        for step in range(1, num_iterations+1):
             # Get new batch
             tr_batch_x, tr_batch_y = get_next_training_batch(tr_batch_size, category_to_int)
             if step % num_prints == 0:

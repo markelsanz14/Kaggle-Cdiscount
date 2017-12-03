@@ -14,14 +14,14 @@ def genimages():
     print('genimages called')
     i=0
     for c, d in enumerate(data):
-        if i >= 7682600:
+        if i >= 10682600:
             print('Last stored id is {}'.format(i-1))
             break
         product_id = d['_id']
         category_id = d['category_id'] # This won't be in Test data
         picture_id = 0
         for e, pic in enumerate(d['imgs']):
-            if i >= 4682600:
+            if i >= 9682600:
                 picture = imread(io.BytesIO(pic['picture']))
                 picture = picture.tostring()
                 name = str(product_id)+'-'+str(picture_id)+'-'+str(category_id)
@@ -38,7 +38,8 @@ def genimages():
 try:
     pathW = '/media/markelsanz14/7EA64A44A649FD61/Users/marke/Desktop/myImages.db'
     pathM = '/media/markelsanz14/Markel/myImages.db'
-    connection = sqlite3.connect(pathM)
+    pathM2 = '/media/markelsanz14/Markel/myImagess.db'
+    connection = sqlite3.connect(pathM2)
     cursor = connection.cursor()
     cursor.execute("CREATE TABLE IF NOT EXISTS Training(id int NOT NULL, name string, image blob, PRIMARY KEY (id))")
     print('DB created')
