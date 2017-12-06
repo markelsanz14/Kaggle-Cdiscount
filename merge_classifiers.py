@@ -1,22 +1,21 @@
 import pandas as pd
 import numpy as np
 
-vgg = pd.read_csv('vgg_16-result.csv')
-inception = pd.read_csv('inception_v4-result.csv')
-resnet = pd.read_csv('resnet_152_v2-result.csv')
+vgg = pd.read_csv('VGG-RESULTT.csv')
+inception = pd.read_csv('INCEPTION-RESULTT.csv')
+resnet = pd.read_csv('RESNET-RESULTT.csv')
 
 output = []
 
-unique = vgg['product'].unique()
-for product in unique:
-    vgg_p = vgg[vgg['product'] == product]['category']
-    inception_p = inception[inception['product'] == product]['category']
-    resnet_p = resnet[resnet['product'] == product]['category']
-    if vgg_p == inception_p or vgg_p == resnet_p:
-        output.append([product, vgg_p])
-    #elif inception_p == resnet_p:
-        #output.append([product, inception_p])
-    else: # All different
-        output.append([product, inception_p]) #ASSIGN BEST
+for i in range(len(vgg)):
+    if inception.iloc[i]['category_id'] == resnet.iloc[i]['category_id'] or vgg.iloc[i]['category_id'] == inception.iloc[i]['category_id']:
+        output.append([inception.iloc[i]['_id'], inception.iloc[i]['category_id']])
+    elif vgg.iloc[i]['category_id'] == resnet.iloc[i]['category_id']:
+        output.append([vgg.iloc[i]['_id'], vgg.iloc[i]['category_id']])
+    else:
+        output.append([resnet.iloc[i]['_id'], resnet.iloc[i]['category_id']])
 
-pd.DataFrame(output, columns=['product', 'category']).to_csv('result.csv', index=False)
+    if i % 1000 == 0:
+        print(i)
+
+pd.DataFrame(output, columns=['_id', 'category_id']).to_csv('RESULT.csv', index=False)
